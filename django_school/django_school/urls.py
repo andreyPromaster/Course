@@ -1,8 +1,10 @@
+from django.contrib import admin
 from django.urls import include, path
 
 from classroom.views import classroom, students, teachers
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', include('classroom.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/signup/', classroom.SignUpView.as_view(), name='signup'),
