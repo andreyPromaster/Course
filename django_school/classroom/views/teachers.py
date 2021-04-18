@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, DateField, F
+from django.db.models.functions import TruncDate, Cast
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -12,7 +13,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 
 from ..decorators import teacher_required
 from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
-from ..models import Answer, Question, Quiz, User
+from ..models import Answer, Question, Quiz, User, TakenQuiz
 
 
 class TeacherSignUpView(CreateView):
@@ -211,3 +212,29 @@ class QuestionDeleteView(DeleteView):
     def get_success_url(self):
         question = self.get_object()
         return reverse('teachers:quiz_change', kwargs={'pk': question.quiz_id})
+
+
+@login_required
+@teacher_required
+def get_analytics_by_count_taken_quizzes(request):
+    labels = []
+    data = []
+    score = []
+    user = request.user
+    quizzes_for_result_table = Quiz.objects.prefetch_related('taken_quizzes').all()
+    for item in quizzes_for_result_table:
+        result = item.taken_quizzes.aggregate(average_score=Avg('score'))
+        score.append(result['average_score'])
+    result = {score[index]: quizzes_for_result_table[index] for index in range(len(score))}
+
+    queryset = TakenQuiz.objects.select_related('quiz')\
+        .filter(quiz__owner=user) \
+        .order_by()\
+        .annotate(date_only=TruncDate('date')).values('date_only').annotate(count=Count('id'))
+    #breakpoint()
+    for entry in queryset:
+        labels.append(entry['date_only'].strftime("%m/%d/%Y"))
+        data.append(entry['count'])
+    return render(request, 'classroom/teachers/analytics.html',
+                  {'labels': labels, 'data': data,
+                   'score': result})
