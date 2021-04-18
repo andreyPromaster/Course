@@ -14,7 +14,7 @@ Read the blog post [How to Implement Multiple User Types with Django](https://si
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/sibtc/django-multiple-user-types-example.git
+git clone https://github.com/andreyPromaster/Course.git
 ```
 
 Install the requirements:
