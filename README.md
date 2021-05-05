@@ -7,8 +7,6 @@ This is an example project to illustrate an implementation of multiple user type
 
 ![Django School Screenshot](https://simpleisbetterthancomplex.com/media/2018/01/teacher-quiz.png)
 
-Read the blog post [How to Implement Multiple User Types with Django](https://simpleisbetterthancomplex.com/tutorial/2018/01/18/how-to-implement-multiple-user-types-with-django.html).
-
 ## Running the Project Locally
 
 First, clone the repository to your local machine:
