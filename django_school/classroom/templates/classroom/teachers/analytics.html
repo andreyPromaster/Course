@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'teachers:quiz_change_list' %}">My Quizzes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Statistics</li>
+    </ol>
+  </nav>
+<div id="container">
+    <canvas id="pie-chart"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script>
+
+    let config = {
+            type: 'bar',
+            data: {
+              labels: {{ labels|safe }},
+              datasets: [{
+                label: 'Amount of passed tests',
+                backgroundColor: 'blue',
+                data: {{ data|safe }}
+              }]
+            },
+            options: {
+              responsive: true,
+              legend: {
+                position: 'top',
+              },
+              title: {
+                display: true,
+                text: 'Count of passed quizzes'
+              }
+            }
+          };
+
+    window.onload = function() {
+      var ctx = document.getElementById('pie-chart').getContext('2d');
+      window.myPie = new Chart(ctx, config);
+    };
+
+  </script>
+{% endblock %}
