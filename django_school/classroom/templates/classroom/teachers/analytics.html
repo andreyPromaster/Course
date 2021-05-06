@@ -19,7 +19,7 @@
             data: {
               labels: {{ labels|safe }},
               datasets: [{
-                label: 'Population',
+                label: 'Amount of passed tests',
                 backgroundColor: 'blue',
                 data: {{ data|safe }}
               }]
@@ -42,30 +42,4 @@
     };
 
   </script>
-<div class="card">
-    <table class="table mb-0">
-      <thead>
-        <tr>
-          <th>Quiz</th>
-          <th>Average store</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for key, value in score.items %}
-          <tr>
-            <td class="align-middle"><a href="{% url 'teachers:quiz_change' value.pk %}">{{ value }}</a></td>
-            <td class="align-middle">{{ key }}</td>
-            <td class="text-right">
-              <a href="{% url 'teachers:quiz_results' value.pk %}" class="btn btn-primary">View results</a>
-            </td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td class="bg-light text-center font-italic" colspan="5">You haven't created any quiz yet.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
 {% endblock %}

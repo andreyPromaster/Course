@@ -72,11 +72,6 @@ class QuizUpdateView(UpdateView):
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
-        '''
-        This method is an implicit object-level permission management
-        This view will only match the ids of existing quizzes that belongs
-        to the logged in user.
-        '''
         return self.request.user.quizzes.all()
 
     def get_success_url(self):
@@ -125,10 +120,6 @@ class QuizResultsView(DetailView):
 @login_required
 @teacher_required
 def question_add(request, pk):
-    # By filtering the quiz by the url keyword argument `pk` and
-    # by the owner, which is the logged in user, we are protecting
-    # this view at the object-level. Meaning only the owner of
-    # quiz will be able to add questions to it.
     quiz = get_object_or_404(Quiz, pk=pk, owner=request.user)
 
     if request.method == 'POST':
@@ -148,12 +139,6 @@ def question_add(request, pk):
 @login_required
 @teacher_required
 def question_change(request, quiz_pk, question_pk):
-    # Simlar to the `question_add` view, this view is also managing
-    # the permissions at object-level. By querying both `quiz` and
-    # `question` we are making sure only the owner of the quiz can
-    # change its details and also only questions that belongs to this
-    # specific quiz can be changed via this url (in cases where the
-    # user might have forged/player with the url params.
     quiz = get_object_or_404(Quiz, pk=quiz_pk, owner=request.user)
     question = get_object_or_404(Question, pk=question_pk, quiz=quiz)
 
@@ -219,14 +204,7 @@ class QuestionDeleteView(DeleteView):
 def get_analytics_by_count_taken_quizzes(request):
     labels = []
     data = []
-    score = []
     user = request.user
-    quizzes_for_result_table = Quiz.objects.prefetch_related('taken_quizzes').all()
-    for item in quizzes_for_result_table:
-        result = item.taken_quizzes.aggregate(average_score=Avg('score'))
-        score.append(result['average_score'])
-    result = {score[index]: quizzes_for_result_table[index] for index in range(len(score))}
-
     queryset = TakenQuiz.objects.select_related('quiz')\
         .filter(quiz__owner=user) \
         .order_by()\
@@ -236,5 +214,4 @@ def get_analytics_by_count_taken_quizzes(request):
         labels.append(entry['date_only'].strftime("%m/%d/%Y"))
         data.append(entry['count'])
     return render(request, 'classroom/teachers/analytics.html',
-                  {'labels': labels, 'data': data,
-                   'score': result})
+                  {'labels': labels, 'data': data})
