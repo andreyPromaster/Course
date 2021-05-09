@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'teachers:quiz_change_list' %}">My Quizzes</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'teachers:quiz_change' quiz.pk %}">{{ quiz.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'teachers:quiz_results' quiz.pk %}">Results</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{student.user.username}}</li>
+    </ol>
+  </nav>
+
+<h1>
+    {{quiz.name}}
+</h1>
+<div>
+{% for key, value in answers.items %}
+<h4>Question: {{key}} </h4>
+<div>
+    {% for answer in value  %}
+    <div {% if answer in students_answers %} style="color: limegreen"{% endif %} >
+        {% if answer.is_correct%}
+        <div>{{ forloop.counter }}. {{answer.text}} <span class="badge badge-success">Right answer</span> </div>
+        {% else %}
+        <div>{{ forloop.counter }}. {{answer.text}}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+</div>
+{% endblock %}

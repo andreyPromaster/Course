@@ -13,7 +13,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 
 from ..decorators import teacher_required
 from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
-from ..models import Answer, Question, Quiz, User, TakenQuiz, Subject
+from ..models import Answer, Question, Quiz, User, TakenQuiz, Subject, Student
 
 
 class TeacherSignUpView(CreateView):
@@ -191,6 +191,28 @@ def question_change(request, quiz_pk, question_pk):
         'question': question,
         'form': form,
         'formset': formset
+    })
+
+
+@login_required
+@teacher_required
+def view_students_answers(request, quiz_pk, student_pk):
+    quiz = get_object_or_404(Quiz, pk=quiz_pk, owner=request.user)
+    student = get_object_or_404(Student, pk=student_pk)
+    questions = Quiz.objects.prefetch_related('questions').get(pk=quiz_pk, owner=request.user).questions.all()
+    answers = {question.text: question.answers.all() for question in questions}
+    all_answers = [question.answers.all() for question in questions]
+    students_answers = []
+    for question_answer in all_answers:
+        for answer in question_answer:
+            if answer.student_answer.filter(student=student).exists():
+                students_answers.append(answer)
+
+    return render(request, 'classroom/teachers/user_quiz_answers.html', {
+        'quiz': quiz,
+        'answers': answers,
+        'students_answers': students_answers,
+        'student': student,
     })
 
 

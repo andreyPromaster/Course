@@ -73,4 +73,4 @@ class TakenQuiz(models.Model):
 
 class StudentAnswer(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='quiz_answers')
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='+')
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='student_answer')
