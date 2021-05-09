@@ -17,6 +17,7 @@ urlpatterns = [
         path('stats/', teachers.get_analytics_by_count_taken_quizzes, name='stats'),
         path('quiz/add/', teachers.QuizCreateView.as_view(), name='quiz_add'),
         path('quiz/<int:pk>/', teachers.QuizUpdateView.as_view(), name='quiz_change'),
+        path('quiz/<int:quiz_pk>/report', teachers.get_quiz_in_pdf, name='get_report'),
         path('quiz/<int:pk>/delete/', teachers.QuizDeleteView.as_view(), name='quiz_delete'),
         path('quiz/<int:pk>/results/', teachers.QuizResultsView.as_view(), name='quiz_results'),
         path('quiz/<int:quiz_pk>/results/<int:student_pk>', teachers.view_students_answers, name='view_students_answer'),

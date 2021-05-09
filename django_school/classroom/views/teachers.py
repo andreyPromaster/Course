@@ -5,11 +5,13 @@ from django.db import transaction
 from django.db.models import Avg, Count, DateField, F, Q
 from django.db.models.functions import TruncDate, Cast
 from django.forms import inlineformset_factory
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
+from fpdf import FPDF
 
 from ..decorators import teacher_required
 from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
@@ -214,6 +216,34 @@ def view_students_answers(request, quiz_pk, student_pk):
         'students_answers': students_answers,
         'student': student,
     })
+
+
+@login_required
+@teacher_required
+def get_quiz_in_pdf(request, quiz_pk):
+    quiz = get_object_or_404(Quiz, pk=quiz_pk, owner=request.user)
+    pdf = FPDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_font('Times', 'B', 16)
+    pdf.cell(0, 10, txt=quiz.name, ln=1)
+    pdf.set_font('Times', '', 14)
+    questions = Quiz.objects.prefetch_related('questions').get(pk=quiz_pk, owner=request.user).questions.all()
+    question_lines = 1
+    for question in questions:
+        pdf.cell(0, 10, txt='', ln=1)
+        pdf.set_font('Times', 'B', 14)
+        pdf.cell(0, 10, txt=f'{question_lines}. {question.text}', ln=1)
+        pdf.set_font('Times', '', 14)
+        pdf.cell(0, 10, txt='', ln=1)
+        question_lines += 1
+        answer_lines = 1
+        for answer in question.answers.all():
+            pdf.cell(0, 10, txt=f'{answer_lines}. {answer.text}', ln=1)
+            answer_lines += 1
+    pdf.output(f'{quiz.name}.pdf')
+    response = FileResponse(open(f'{quiz.name}.pdf', 'rb'), as_attachment=True)
+    return response
 
 
 @method_decorator([login_required, teacher_required], name='dispatch')
