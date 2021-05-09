@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Avg, Count, DateField, F
+from django.db.models import Avg, Count, DateField, F, Q
 from django.db.models.functions import TruncDate, Cast
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,7 +13,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 
 from ..decorators import teacher_required
 from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
-from ..models import Answer, Question, Quiz, User, TakenQuiz
+from ..models import Answer, Question, Quiz, User, TakenQuiz, Subject
 
 
 class TeacherSignUpView(CreateView):
@@ -38,11 +38,31 @@ class QuizListView(ListView):
     context_object_name = 'quizzes'
     template_name = 'classroom/teachers/quiz_change_list.html'
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['subjects_list'] = Subject.objects.all()
+        return context
+
     def get_queryset(self):
+        find_query = self.request.GET.get('q')
+        type_query = self.request.GET.get('type')
+        ordering_query = self.request.GET.get('ordering')
         queryset = self.request.user.quizzes \
             .select_related('subject') \
             .annotate(questions_count=Count('questions', distinct=True)) \
             .annotate(taken_count=Count('taken_quizzes', distinct=True))
+        #breakpoint()
+        if find_query is not None:
+            queryset = queryset.filter(name__icontains=find_query)
+        if type_query is not None:
+            if type_query.isdigit():
+                queryset = queryset.filter(subject__pk=type_query)
+
+        if ordering_query is not None:
+            if ordering_query == 'name' or ordering_query == '-name':
+                queryset = queryset.order_by(ordering_query)
         return queryset
 
 

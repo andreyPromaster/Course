@@ -9,6 +9,47 @@
   <h2 class="mb-3">My Quizzes</h2>
   <a href="{% url 'teachers:quiz_add' %}" class="btn btn-primary mb-3" role="button">Add quiz</a>
   <a href="{% url 'teachers:stats' %}" class="btn btn-success mb-3" role="button">View statistics</a>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <form class="form-inline">
+  <div class="form-group">
+    <label class="sr-only">Find quiz</label>
+    <input name="q" type="text" class="form-control" id="q" placeholder="Search...">
+  </div>
+</form>
+    </div>
+    <div class="col">
+      <form class="form-inline">
+        <div class="form-group">
+      <select name="type" id="inlineFormCustomSelect" class="custom-select">
+        <option selected>Subject</option>
+        {% for subject in subjects_list %}
+        <option value={{ subject.id }} >{{ subject.name }}</option>
+        {% endfor %}
+         <option value="all">All</option>
+      </select>
+      <button type="submit" class="btn btn-primary mb-2">Submit</button>
+
+        </div>
+</form>
+    </div>
+        <div class="col">
+      <form class="form-inline">
+        <div class="form-group">
+      <select name="ordering" id="ordering" class="custom-select">
+        <option selected>Order</option>
+        <option value="name" >A-Z</option>
+        <option value="-name">Z-A</option>
+      </select>
+      <button type="submit" class="btn btn-primary mb-2">Submit</button>
+
+        </div>
+</form>
+    </div>
+  </div>
+</div>
+
   <div class="card">
     <table class="table mb-0">
       <thead>

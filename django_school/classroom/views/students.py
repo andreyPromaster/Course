@@ -10,7 +10,7 @@ from django.views.generic import CreateView, ListView, UpdateView
 
 from ..decorators import student_required
 from ..forms import StudentInterestsForm, StudentSignUpForm, TakeQuizForm
-from ..models import Quiz, Student, TakenQuiz, User
+from ..models import Quiz, Student, TakenQuiz, User, Subject
 
 
 class StudentSignUpView(CreateView):
@@ -50,7 +50,17 @@ class QuizListView(ListView):
     context_object_name = 'quizzes'
     template_name = 'classroom/students/quiz_list.html'
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['subjects_list'] = Subject.objects.all()
+        return context
+
     def get_queryset(self):
+        find_query = self.request.GET.get('q')
+        type_query = self.request.GET.get('type')
+        ordering_query = self.request.GET.get('ordering')
         student = self.request.user.student
         student_interests = student.interests.values_list('pk', flat=True)
         taken_quizzes = student.quizzes.values_list('pk', flat=True)
@@ -58,6 +68,14 @@ class QuizListView(ListView):
             .exclude(pk__in=taken_quizzes) \
             .annotate(questions_count=Count('questions')) \
             .filter(questions_count__gt=0)
+        if find_query is not None:
+            queryset = queryset.filter(name__icontains=find_query)
+        if type_query is not None:
+            if type_query.isdigit():
+                queryset = queryset.filter(subject__pk=type_query)
+        if ordering_query is not None:
+            if ordering_query == 'name' or ordering_query == '-name':
+                queryset = queryset.order_by(ordering_query)
         return queryset
 
 
